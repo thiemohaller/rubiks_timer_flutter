@@ -100,6 +100,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
+  // TIMER
+
   Widget timer() {
     return Container(
       child: Column(
@@ -242,6 +244,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
+  // STOPWATCH
+
   Widget stopwatch() {
     return Container(
       child: Column(
@@ -263,43 +267,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             flex: 4,
             child: Container(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      RaisedButton(
-                        color: Colors.redAccent,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 40.0, vertical: 15.0),
-                        onPressed: stopIsDisabled ? null : stopStopwatch,
-                        child: Text(
-                          "Stop",
-                          style: TextStyle(fontSize: 20.0, color: Colors.white),
-                        ),
-                      ),
-                      RaisedButton(
-                        color: Colors.teal,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 40.0, vertical: 15.0),
-                        onPressed: resetIsDisabled ? null : resetStopwatch,
-                        child: Text(
-                          "Reset",
-                          style: TextStyle(fontSize: 20.0, color: Colors.white),
-                        ),
-                      )
-                    ],
-                  ),
-                  RaisedButton(
-                    color: Colors.blueAccent,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 80.0, vertical: 20.0),
-                    onPressed: startIsDisabled ? startStopwatch : null,
-                    child: Text(
-                      "Go!",
-                      style: TextStyle(fontSize: 24.0, color: Colors.white),
-                    ),
-                  )
+                  buildFloatingButton(
+                      swatch.isRunning ? "stop" : "Go!", goButtonPressed),
                 ],
               ),
             ),
@@ -308,6 +279,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  // build app
 
   @override
   Widget build(BuildContext context) {
@@ -354,35 +327,37 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
     setState(() {
       stopwatchTimeToDisplay =
-      (swatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
-          ":" +
-          (swatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+          (swatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
+              ":" +
+              (swatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
     });
   }
 
-  void stopStopwatch() {
+  void goButtonPressed() {
     setState(() {
-      stopIsDisabled = true;
-      resetIsDisabled = false;
+      if (swatch.isRunning) {
+        setState(() {
+          swatch.stop();
+        });
+      } else {
+        swatch.reset();
+        stopwatchTimeToDisplay = "00:000";
+        swatch.start();
+        startSwatchTimer();
+      }
     });
-    swatch.stop();
   }
+}
 
-  void resetStopwatch() {
-    setState(() {
-      startIsDisabled = true;
-      resetIsDisabled = true;
-    });
-    swatch.reset();
-    stopwatchTimeToDisplay = "00:000";
-  }
-
-  void startStopwatch() {
-    setState(() {
-      stopIsDisabled = false;
-      startIsDisabled = false;
-    });
-    swatch.start();
-    startSwatchTimer();
-  }
+Widget buildFloatingButton(String text, VoidCallback callback) {
+  return new Container(
+    width: 200.0,
+    height: 200.0,
+    child: FittedBox(
+      child: FloatingActionButton(
+        onPressed: callback,
+        child: new Text(text),
+      ),
+    ),
+  );
 }
