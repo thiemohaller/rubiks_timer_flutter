@@ -1,8 +1,10 @@
-
 import 'dart:async';
+import 'dart:math';
+import 'dart:ui' as prefix0;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_listview/infinite_listview.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -21,10 +23,39 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int timeForTimer = 0;
   String timeToDisplay = "00:00:00";
 
+// build app
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Rubiks Timer",
+        ),
+        centerTitle: true,
+        bottom: TabBar(
+          tabs: <Widget>[Text("Timer"), Text("Stopwatch"), Text("Solves")],
+          labelPadding: EdgeInsets.only(
+            bottom: 10.0,
+          ),
+          labelStyle: TextStyle(
+            fontSize: 18.0,
+          ),
+          unselectedLabelColor: Colors.white70,
+          controller: tc,
+        ),
+      ),
+      body: TabBarView(
+        children: <Widget>[timer(), stopwatch(), PreviousSolvesList()],
+        controller: tc,
+      ),
+    );
+  }
+
   @override
   void initState() {
     tc = TabController(
-      length: 2,
+      length: 3,
       vsync: this,
     );
     super.initState();
@@ -196,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 RaisedButton(
                   onPressed: timerRunning ? startTimer : null,
                   padding:
-                  EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
+                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
                   color: Colors.lightBlue,
                   child: Text(
                     "Go!",
@@ -209,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 RaisedButton(
                   onPressed: timerStopped ? null : stopTimer,
                   padding:
-                  EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
+                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
                   color: Colors.redAccent,
                   child: Text(
                     "Stop",
@@ -244,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   stopwatchTimeToDisplay,
                   style: TextStyle(
                     fontSize: 75.0,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               )),
@@ -263,6 +294,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Expanded(
+            flex: 3,
+            child: Container(
+              alignment: Alignment.center,
+              // TODO display list of scrambled moves
+            ),
+          ),
+          Expanded(
             flex: 4,
             child: Container(
               child: Column(
@@ -275,35 +313,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           )
         ],
-      ),
-    );
-  }
-
-  // build app
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Stopwatch",
-        ),
-        centerTitle: true,
-        bottom: TabBar(
-          tabs: <Widget>[Text("Timer"), Text("Stopwatch")],
-          labelPadding: EdgeInsets.only(
-            bottom: 10.0,
-          ),
-          labelStyle: TextStyle(
-            fontSize: 18.0,
-          ),
-          unselectedLabelColor: Colors.white70,
-          controller: tc,
-        ),
-      ),
-      body: TabBarView(
-        children: <Widget>[timer(), stopwatch()],
-        controller: tc,
       ),
     );
   }
@@ -339,10 +348,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         setState(() {
           swatch.stop();
           previousSwatchTime = (swatch.elapsed.inSeconds % 60)
-              .toString()
-              .padLeft(2, '0') +
+                  .toString()
+                  .padLeft(2, '0') +
               ":" +
               (swatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+          previousSolvesList.add(previousSwatchTime);
         });
       } else {
         swatch.reset();
@@ -366,4 +376,83 @@ Widget buildFloatingButton(String text, VoidCallback callback) {
       ),
     ),
   );
+}
+
+// Scramble algorithm
+// select 19 - 21 out of these
+var possibleScrambleMoves = [
+  'F',
+  'U',
+  'D',
+  'B',
+  'L',
+  'R',
+  'F\'',
+  'U\'',
+  'D\'',
+  'B\'',
+  'L\'',
+  'R\'',
+  'F2',
+  'U2',
+  'D2',
+  'B2',
+  'L2',
+  'R2'
+];
+
+List<String> scrambledList(List inputList) {
+  List<String> outputList = [];
+  final random = new Random();
+  int amountOfScrambles = 20;
+
+  for(var i = 0; i < amountOfScrambles; i++) {
+    var i = random.nextInt(inputList.length);
+    if(outputList[i] != outputList[i-1]) {
+      outputList.add(inputList[i]);
+    } else {
+      i = i - 1;
+    }
+  }
+
+  return outputList;
+}
+
+class ListDisplay extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(itemBuilder: (context, index) {
+      return null;
+    });
+  }
+}
+
+// model for solve
+class SolveDetails {
+  String solveTime;
+  List<String> solveScramble;
+  bool solveDNF;
+
+  SolveDetails(this.solveTime, this.solveScramble, this.solveDNF);
+}
+
+// PREVIOUS SOLVES TODO remove 00:000
+List<String> previousSolvesList = ['00:000'];
+
+class PreviousSolvesList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var listViewBuilder = InfiniteListView.builder(
+        itemCount: previousSolvesList.length,
+        itemBuilder: (context, idx) {
+          return Text(
+            previousSolvesList[idx],
+            style: TextStyle(fontSize: 25.0),
+          );
+        });
+    return new Container(
+      alignment: Alignment.center,
+      child: listViewBuilder,
+    );
+  }
 }
