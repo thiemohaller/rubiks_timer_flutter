@@ -33,12 +33,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     'B',
     'L',
     'R',
-    'F\'',
-    'U\'',
-    'D\'',
-    'B\'',
-    'L\'',
-    'R\'',
+    "F'",
+    "U'",
+    "D'",
+    "B'",
+    "L'",
+    "R'",
     'F2',
     'U2',
     'D2',
@@ -319,8 +319,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             flex: 2,
             child: Container(
               alignment: Alignment.center,
+              margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
               child: Column(
-                children: <Widget>[Text(scrambledMoves)],
+                children: <Widget>[
+                  Text(
+                    scrambledMoves,
+                    style: TextStyle(
+                      fontSize: 23.0,
+                    ),
+                  )
+                ],
               ),
             ),
           ),
@@ -331,8 +339,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   buildBigFloatingButton(
-                      cubeStopwatch.isRunning ? "Stop" : "Go!", goButtonPressed),
-                  buildSmallFloatingButton(updateScrambledList)
+                      cubeStopwatch.isRunning ? "Stop" : "Go!",
+                      goButtonPressed),
+                  //buildSmallFloatingButton(updateScrambledList)
                 ],
               ),
             ),
@@ -358,10 +367,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       startSwatchTimer();
     }
     setState(() {
-      stopwatchTimeToDisplay =
-          (cubeStopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
-              ":" +
-              (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+      stopwatchTimeToDisplay = (cubeStopwatch.elapsed.inSeconds % 60)
+              .toString()
+              .padLeft(2, '0') +
+          ":" +
+          (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
     });
   }
 
@@ -374,7 +384,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   .toString()
                   .padLeft(2, '0') +
               ":" +
-              (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+              (cubeStopwatch.elapsedMilliseconds % 1000)
+                  .toString()
+                  .padLeft(3, '0');
           previousSolvesList.add(previousSwatchTime);
           updateScrambledList();
         });
@@ -404,39 +416,54 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       if (i == 0) {
         scrambledMovesAsList.add(randElement);
-      } else if (randElement != scrambledMovesAsList[i - 1]) {
-        scrambledMovesAsList.add(randElement);
-      } else if (randElement == 'F' &&
-          (scrambledMovesAsList[i - 1] == 'F\'' ||
-              scrambledMovesAsList[i - 1] == '2F')) {
+      } else if ((randElement == 'F' ||
+              randElement == "F'" ||
+              randElement == 'F2') &&
+          (scrambledMovesAsList[i - 1] == 'F' ||
+              scrambledMovesAsList[i - 1] == "F'" ||
+              scrambledMovesAsList[i - 1] == 'F2')) {
         i = i - 1;
-      } else if (randElement == 'U' &&
-          (scrambledMovesAsList[i - 1] == 'U\'' ||
-              scrambledMovesAsList[i - 1] == '2U')) {
+      } else if ((randElement == 'U' ||
+              randElement == "U'" ||
+              randElement == 'U2') &&
+          (scrambledMovesAsList[i - 1] == 'U' ||
+              scrambledMovesAsList[i - 1] == "U'" ||
+              scrambledMovesAsList[i - 1] == 'U2')) {
         i = i - 1;
-      } else if (randElement == 'R' &&
-          (scrambledMovesAsList[i - 1] == 'R\'' ||
-              scrambledMovesAsList[i - 1] == '2R')) {
+      } else if ((randElement == 'R' ||
+              randElement == "R'" ||
+              randElement == 'R2') &&
+          (scrambledMovesAsList[i - 1] == 'R' ||
+              scrambledMovesAsList[i - 1] == "R'" ||
+              scrambledMovesAsList[i - 1] == 'R2')) {
         i = i - 1;
-      } else if (randElement == 'L' &&
-          (scrambledMovesAsList[i - 1] == 'L\'' ||
-              scrambledMovesAsList[i - 1] == '2L')) {
+      } else if ((randElement == 'L' ||
+              randElement == "L'" ||
+              randElement == 'L2') &&
+          (scrambledMovesAsList[i - 1] == 'L' ||
+              scrambledMovesAsList[i - 1] == "L'" ||
+              scrambledMovesAsList[i - 1] == 'L2')) {
         i = i - 1;
-      } else if (randElement == 'D' &&
-          (scrambledMovesAsList[i - 1] == 'D\'' ||
-              scrambledMovesAsList[i - 1] == '2D')) {
+      } else if ((randElement == 'D' ||
+              randElement == "D'" ||
+              randElement == 'D2') &&
+          (scrambledMovesAsList[i - 1] == 'D' ||
+              scrambledMovesAsList[i - 1] == "D'" ||
+              scrambledMovesAsList[i - 1] == 'D2')) {
         i = i - 1;
-      } else if (randElement == 'B' &&
-          (scrambledMovesAsList[i - 1] == 'B\'' ||
-              scrambledMovesAsList[i - 1] == '2B')) {
+      } else if ((randElement == 'B' ||
+              randElement == "B'" ||
+              randElement == 'B2') &&
+          (scrambledMovesAsList[i - 1] == 'B' ||
+              scrambledMovesAsList[i - 1] == "B'" ||
+              scrambledMovesAsList[i - 1] == 'B2')) {
         i = i - 1;
       } else {
-        i = i - 1;
+        scrambledMovesAsList.add(randElement);
       }
-      /*
+
       debugPrint("scrambledmoves as list: " + scrambledMovesAsList.toString());
-      debugPrint("");
-       */
+      //debugPrint("");
     }
 
     scrambledMoves = scrambledMovesAsList.toString();
