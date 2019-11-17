@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui' as prefix0;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' as prefix0;
 import 'package:flutter/material.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -22,6 +22,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   bool checkTimer = true;
   int timeForTimer = 0;
   String timeToDisplay = "00:00:00";
+  String scrambledMoves = "";
+  List<String> scrambledMovesAsList = [];
+  int amountOfScrambles = 20;
+
+  var possibleScrambleMoves = [
+    'F',
+    'U',
+    'D',
+    'B',
+    'L',
+    'R',
+    'F\'',
+    'U\'',
+    'D\'',
+    'B\'',
+    'L\'',
+    'R\'',
+    'F2',
+    'U2',
+    'D2',
+    'B2',
+    'L2',
+    'R2'
+  ];
 
 // build app
 
@@ -117,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   // TIMER
-
   Widget timer() {
     return Container(
       child: Column(
@@ -261,7 +284,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   // STOPWATCH
-
   Widget stopwatch() {
     return Container(
       child: Column(
@@ -271,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: Container(
                 alignment: Alignment.center,
                 child: Text(
-                  // SS:MilliMilli
+                  // SS:MilliMilliMilli
                   stopwatchTimeToDisplay,
                   style: TextStyle(
                     fontSize: 75.0,
@@ -284,7 +306,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Container(
               alignment: Alignment.center,
               child: Text(
-                // TODO add regular text here
                 previousSwatchTime,
                 style: TextStyle(
                   fontSize: 45.0,
@@ -294,10 +315,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: Container(
               alignment: Alignment.center,
-              // TODO display list of scrambled moves
+              child: Column(
+                children: <Widget>[Text(scrambledMoves)],
+              ),
             ),
           ),
           Expanded(
@@ -306,8 +329,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  buildFloatingButton(
+                  buildBigFloatingButton(
                       swatch.isRunning ? "Stop" : "Go!", goButtonPressed),
+                  buildSmallFloatingButton(updateScrambledList)
                 ],
               ),
             ),
@@ -362,9 +386,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     });
   }
+
+// update existing list
+  void updateScrambledList() {
+    scrambledMovesAsList = [];
+
+    for(var i = 0; i < amountOfScrambles; i++) {
+      // https://stackoverflow.com/questions/17476718/
+      List possibleScrambleMovesCopy = possibleScrambleMoves.toList();
+      var randElement = (possibleScrambleMovesCopy..shuffle()).first;
+
+      debugPrint("copy: " + possibleScrambleMovesCopy.toString());
+      debugPrint("rand element: " + randElement);
+      debugPrint("original: " + possibleScrambleMoves.toString());
+
+      if(i == 0) {
+        scrambledMovesAsList.add(randElement);
+      } else if(randElement != scrambledMovesAsList[i - 1]) {
+        scrambledMovesAsList.add(randElement);
+      } else {
+        i = i - 1;
+      }
+      debugPrint("scrambledmoves as list: " + scrambledMovesAsList.toString());
+      debugPrint("");
+    }
+
+    scrambledMoves = scrambledMovesAsList.toString();
+  }
 }
 
-Widget buildFloatingButton(String text, VoidCallback callback) {
+Widget buildBigFloatingButton(String text, VoidCallback callback) {
   return new Container(
     width: 200.0,
     height: 200.0,
@@ -378,53 +429,18 @@ Widget buildFloatingButton(String text, VoidCallback callback) {
   );
 }
 
-// Scramble algorithm
-// select 19 - 21 out of these
-var possibleScrambleMoves = [
-  'F',
-  'U',
-  'D',
-  'B',
-  'L',
-  'R',
-  'F\'',
-  'U\'',
-  'D\'',
-  'B\'',
-  'L\'',
-  'R\'',
-  'F2',
-  'U2',
-  'D2',
-  'B2',
-  'L2',
-  'R2'
-];
-
-List<String> scrambledList(List inputList) {
-  List<String> outputList = [];
-  final random = new Random();
-  int amountOfScrambles = 20;
-
-  for(var i = 0; i < amountOfScrambles; i++) {
-    var i = random.nextInt(inputList.length);
-    if(outputList[i] != outputList[i-1]) {
-      outputList.add(inputList[i]);
-    } else {
-      i = i - 1;
-    }
-  }
-
-  return outputList;
-}
-
-class ListDisplay extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(itemBuilder: (context, index) {
-      return null;
-    });
-  }
+Widget buildSmallFloatingButton(VoidCallback callback) {
+  return new Container(
+    width: 50.0,
+    height: 50.0,
+    child: FittedBox(
+      child: FloatingActionButton(
+        onPressed: callback,
+        child: new Text("Scramble"),
+        backgroundColor: Colors.blueAccent,
+      ),
+    ),
+  );
 }
 
 // model for solve
@@ -436,9 +452,9 @@ class SolveDetails {
   SolveDetails(this.solveTime, this.solveScramble, this.solveDNF);
 }
 
-// PREVIOUS SOLVES TODO remove 00:000
-List<String> previousSolvesList = ['00:000'];
+List<String> previousSolvesList = [];
 
+// TODO flip list
 class PreviousSolvesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
