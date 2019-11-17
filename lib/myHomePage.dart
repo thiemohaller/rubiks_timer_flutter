@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       length: 3,
       vsync: this,
     );
+    updateScrambledList(); // TODO fix
     super.initState();
   }
 
@@ -330,7 +331,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   buildBigFloatingButton(
-                      swatch.isRunning ? "Stop" : "Go!", goButtonPressed),
+                      cubeStopwatch.isRunning ? "Stop" : "Go!", goButtonPressed),
                   buildSmallFloatingButton(updateScrambledList)
                 ],
               ),
@@ -341,13 +342,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  // STOPWATCH
   bool startIsDisabled = true;
   bool stopIsDisabled = true;
-  bool resetIsDisabled = true;
   String stopwatchTimeToDisplay = "00:000";
   String previousSwatchTime = "00:000";
-  var swatch = Stopwatch();
+  var cubeStopwatch = Stopwatch();
   final dur = const Duration(milliseconds: 1);
 
   void startSwatchTimer() {
@@ -355,33 +354,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   void keepRunning() {
-    if (swatch.isRunning) {
+    if (cubeStopwatch.isRunning) {
       startSwatchTimer();
     }
     setState(() {
       stopwatchTimeToDisplay =
-          (swatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
+          (cubeStopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
               ":" +
-              (swatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+              (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
     });
   }
 
   void goButtonPressed() {
     setState(() {
-      if (swatch.isRunning) {
+      if (cubeStopwatch.isRunning) {
         setState(() {
-          swatch.stop();
-          previousSwatchTime = (swatch.elapsed.inSeconds % 60)
+          cubeStopwatch.stop();
+          previousSwatchTime = (cubeStopwatch.elapsed.inSeconds % 60)
                   .toString()
                   .padLeft(2, '0') +
               ":" +
-              (swatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+              (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
           previousSolvesList.add(previousSwatchTime);
+          updateScrambledList();
         });
       } else {
-        swatch.reset();
+        cubeStopwatch.reset();
         stopwatchTimeToDisplay = "00:000";
-        swatch.start();
+        cubeStopwatch.start();
         startSwatchTimer();
       }
     });
@@ -391,24 +391,52 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void updateScrambledList() {
     scrambledMovesAsList = [];
 
-    for(var i = 0; i < amountOfScrambles; i++) {
+    for (var i = 0; i < amountOfScrambles; i++) {
       // https://stackoverflow.com/questions/17476718/
       List possibleScrambleMovesCopy = possibleScrambleMoves.toList();
       var randElement = (possibleScrambleMovesCopy..shuffle()).first;
 
+      /*
       debugPrint("copy: " + possibleScrambleMovesCopy.toString());
       debugPrint("rand element: " + randElement);
       debugPrint("original: " + possibleScrambleMoves.toString());
+      */
 
-      if(i == 0) {
+      if (i == 0) {
         scrambledMovesAsList.add(randElement);
-      } else if(randElement != scrambledMovesAsList[i - 1]) {
+      } else if (randElement != scrambledMovesAsList[i - 1]) {
         scrambledMovesAsList.add(randElement);
+      } else if (randElement == 'F' &&
+          (scrambledMovesAsList[i - 1] == 'F\'' ||
+              scrambledMovesAsList[i - 1] == '2F')) {
+        i = i - 1;
+      } else if (randElement == 'U' &&
+          (scrambledMovesAsList[i - 1] == 'U\'' ||
+              scrambledMovesAsList[i - 1] == '2U')) {
+        i = i - 1;
+      } else if (randElement == 'R' &&
+          (scrambledMovesAsList[i - 1] == 'R\'' ||
+              scrambledMovesAsList[i - 1] == '2R')) {
+        i = i - 1;
+      } else if (randElement == 'L' &&
+          (scrambledMovesAsList[i - 1] == 'L\'' ||
+              scrambledMovesAsList[i - 1] == '2L')) {
+        i = i - 1;
+      } else if (randElement == 'D' &&
+          (scrambledMovesAsList[i - 1] == 'D\'' ||
+              scrambledMovesAsList[i - 1] == '2D')) {
+        i = i - 1;
+      } else if (randElement == 'B' &&
+          (scrambledMovesAsList[i - 1] == 'B\'' ||
+              scrambledMovesAsList[i - 1] == '2B')) {
+        i = i - 1;
       } else {
         i = i - 1;
       }
+      /*
       debugPrint("scrambledmoves as list: " + scrambledMovesAsList.toString());
       debugPrint("");
+       */
     }
 
     scrambledMoves = scrambledMovesAsList.toString();
