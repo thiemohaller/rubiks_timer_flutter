@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart' as prefix0;
 import 'package:flutter/material.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -58,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         bottom: TabBar(
-          tabs: <Widget>[Text("Timer"), Text("Stopwatch"), Text("Solves")],
+          tabs: <Widget>[Text("Stopwatch"), Text("Solves")],
           labelPadding: EdgeInsets.only(
             bottom: 10.0,
           ),
@@ -70,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ),
       body: TabBarView(
-        children: <Widget>[timer(), stopwatch(), PreviousSolvesList()],
+        children: <Widget>[stopwatch(), PreviousSolvesList()],
         controller: tc,
       ),
     );
@@ -79,10 +77,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     tc = TabController(
-      length: 3,
+      length: 2,
       vsync: this,
     );
-    updateScrambledList(); // TODO fix
+    scrambleList();
     super.initState();
   }
 
@@ -324,6 +322,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 children: <Widget>[
                   Text(
                     scrambledMoves,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 23.0,
                     ),
@@ -388,7 +387,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   .toString()
                   .padLeft(3, '0');
           previousSolvesList.add(previousSwatchTime);
-          updateScrambledList();
+          scrambleList();
         });
       } else {
         cubeStopwatch.reset();
@@ -400,19 +399,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
 // update existing list
-  void updateScrambledList() {
+  void scrambleList() {
     scrambledMovesAsList = [];
 
     for (var i = 0; i < amountOfScrambles; i++) {
       // https://stackoverflow.com/questions/17476718/
       List possibleScrambleMovesCopy = possibleScrambleMoves.toList();
       var randElement = (possibleScrambleMovesCopy..shuffle()).first;
-
-      /*
-      debugPrint("copy: " + possibleScrambleMovesCopy.toString());
-      debugPrint("rand element: " + randElement);
-      debugPrint("original: " + possibleScrambleMoves.toString());
-      */
 
       if (i == 0) {
         scrambledMovesAsList.add(randElement);
@@ -463,10 +456,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
 
       debugPrint("scrambledmoves as list: " + scrambledMovesAsList.toString());
-      //debugPrint("");
     }
 
-    scrambledMoves = scrambledMovesAsList.toString();
+    var scrambledMovesCopy = scrambledMovesAsList.toString();
+    scrambledMoves  = scrambledMovesCopy.replaceAll("[", "").replaceAll("]", "").replaceAll(",", " ");
   }
 }
 
@@ -484,14 +477,14 @@ Widget buildBigFloatingButton(String text, VoidCallback callback) {
   );
 }
 
-Widget buildSmallFloatingButton(VoidCallback callback) {
+Widget buildSmallFloatingButton(String text, VoidCallback callback) {
   return new Container(
     width: 50.0,
     height: 50.0,
     child: FittedBox(
       child: FloatingActionButton(
         onPressed: callback,
-        child: new Text("Scramble"),
+        child: new Text(text),
         backgroundColor: Colors.blueAccent,
       ),
     ),
