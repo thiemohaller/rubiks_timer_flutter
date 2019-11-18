@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_listview/infinite_listview.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -68,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ),
       body: TabBarView(
-        children: <Widget>[stopwatch(), PreviousSolvesList()],
+        children: <Widget>[stopwatch(), statsList()],
         controller: tc,
       ),
     );
@@ -352,6 +351,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool startIsDisabled = true;
   bool stopIsDisabled = true;
+  bool solveTookMinute = false;
   String stopwatchTimeToDisplay = "00:000";
   String previousSwatchTime = "00:000";
   var cubeStopwatch = Stopwatch();
@@ -366,11 +366,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       startSwatchTimer();
     }
     setState(() {
-      stopwatchTimeToDisplay = (cubeStopwatch.elapsed.inSeconds % 60)
-              .toString()
-              .padLeft(2, '0') +
-          ":" +
-          (cubeStopwatch.elapsedMilliseconds % 1000).toString().padLeft(3, '0');
+      // if solve takes over 1 minute, display minutes as well
+      if (cubeStopwatch.elapsed.inSeconds < 60) {
+        stopwatchTimeToDisplay =
+            (cubeStopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
+                ":" +
+                (cubeStopwatch.elapsedMilliseconds % 1000)
+                    .toString()
+                    .padLeft(3, '0');
+      } else {
+        stopwatchTimeToDisplay = (cubeStopwatch.elapsed.inMinutes % 60)
+                .toString() +
+            ":" +
+            (cubeStopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0') +
+            ":" +
+            (cubeStopwatch.elapsedMilliseconds % 1000)
+                .toString()
+                .padLeft(3, '0');
+        solveTookMinute = true;
+      }
     });
   }
 
@@ -379,14 +393,29 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (cubeStopwatch.isRunning) {
         setState(() {
           cubeStopwatch.stop();
-          previousSwatchTime = (cubeStopwatch.elapsed.inSeconds % 60)
-                  .toString()
-                  .padLeft(2, '0') +
-              ":" +
-              (cubeStopwatch.elapsedMilliseconds % 1000)
-                  .toString()
-                  .padLeft(3, '0');
-          previousSolvesList.add(previousSwatchTime);
+          // TODO replace with avg of 5
+          if (solveTookMinute) {
+            previousSwatchTime =
+                (cubeStopwatch.elapsed.inMinutes % 60).toString() +
+                    ":" +
+                    (cubeStopwatch.elapsed.inSeconds % 60)
+                        .toString()
+                        .padLeft(2, '0') +
+                    ":" +
+                    (cubeStopwatch.elapsedMilliseconds % 1000)
+                        .toString()
+                        .padLeft(3, '0');
+          } else {
+            previousSwatchTime = (cubeStopwatch.elapsed.inSeconds % 60)
+                    .toString()
+                    .padLeft(2, '0') +
+                ":" +
+                (cubeStopwatch.elapsedMilliseconds % 1000)
+                    .toString()
+                    .padLeft(3, '0');
+          }
+          // insert time at first position
+          previousSolvesList.insert(0, previousSwatchTime);
           scrambleList();
         });
       } else {
@@ -459,7 +488,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
 
     var scrambledMovesCopy = scrambledMovesAsList.toString();
-    scrambledMoves  = scrambledMovesCopy.replaceAll("[", "").replaceAll("]", "").replaceAll(",", " ");
+    scrambledMoves = scrambledMovesCopy
+        .replaceAll("[", "")
+        .replaceAll("]", "")
+        .replaceAll(",", " ");
   }
 }
 
@@ -479,8 +511,8 @@ Widget buildBigFloatingButton(String text, VoidCallback callback) {
 
 Widget buildSmallFloatingButton(String text, VoidCallback callback) {
   return new Container(
-    width: 50.0,
-    height: 50.0,
+    width: 75.0,
+    height: 75.0,
     child: FittedBox(
       child: FloatingActionButton(
         onPressed: callback,
@@ -501,22 +533,26 @@ class SolveDetails {
 }
 
 List<String> previousSolvesList = [];
+double averageOfFive = 0.0;
 
-// TODO flip list
-class PreviousSolvesList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var listViewBuilder = InfiniteListView.builder(
-        itemCount: previousSolvesList.length,
-        itemBuilder: (context, idx) {
-          return Text(
-            previousSolvesList[idx],
-            style: TextStyle(fontSize: 25.0),
-          );
-        });
-    return new Container(
-      alignment: Alignment.center,
-      child: listViewBuilder,
-    );
-  }
+Widget buildStatisticsList(BuildContext context, int index) {
+  return new Text(
+    previousSolvesList[index],
+    textAlign: TextAlign.center,
+    style: TextStyle(fontSize: 30.0,),
+  );
+}
+
+Widget statsList() {
+  return Container(
+    alignment: Alignment.center,
+    padding: EdgeInsets.all(8.0),
+    child: Center(
+      child: new ListView.builder(
+          padding: EdgeInsets.all(5.0),
+          itemCount: previousSolvesList.length,
+          itemBuilder: (context, int index) =>
+              buildStatisticsList(context, index)),
+    ),
+  );
 }
