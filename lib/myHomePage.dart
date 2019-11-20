@@ -304,7 +304,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Container(
               alignment: Alignment.center,
               child: Text(
-                previousSwatchTime,
+                millisToString(averageOfFive),
                 style: TextStyle(
                   fontSize: 45.0,
                   fontWeight: FontWeight.w200,
@@ -392,30 +392,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     setState(() {
       if (cubeStopwatch.isRunning) {
         setState(() {
+          previousSolvesInMilliseconds.insert(0, cubeStopwatch.elapsedMilliseconds);
           cubeStopwatch.stop();
-          // TODO replace with avg of 5
-          if (solveTookMinute) {
-            previousSwatchTime =
-                (cubeStopwatch.elapsed.inMinutes % 60).toString() +
-                    ":" +
-                    (cubeStopwatch.elapsed.inSeconds % 60)
-                        .toString()
-                        .padLeft(2, '0') +
-                    ":" +
-                    (cubeStopwatch.elapsedMilliseconds % 1000)
-                        .toString()
-                        .padLeft(3, '0');
-          } else {
-            previousSwatchTime = (cubeStopwatch.elapsed.inSeconds % 60)
-                    .toString()
-                    .padLeft(2, '0') +
-                ":" +
-                (cubeStopwatch.elapsedMilliseconds % 1000)
-                    .toString()
-                    .padLeft(3, '0');
+
+          // TODO put 5 into variable
+          if(previousSolvesInMilliseconds.length >= 5) {
+             averageOfFive = 0.0;
+             //Duration solveAverageDuration = new Duration(hours: 0, minutes: , seconds: , milliseconds: );
+            for(int i = 0; i < 5 ;i++) {
+              averageOfFive = averageOfFive + previousSolvesInMilliseconds[i];
+            }
+
+            averageOfFive = averageOfFive / 5;
           }
-          // insert time at first position
-          previousSolvesList.insert(0, previousSwatchTime);
+
+          previousSolvesList.insert(0, stopwatchTimeToDisplay);
           scrambleList();
         });
       } else {
@@ -495,6 +486,31 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
+String millisToString(double timeInMillis) {
+
+  //Duration solveDuration = new Duration(milliseconds: timeInMillis);
+
+  double minutes = 0;
+  double seconds = 0;
+  double millis = 0;
+
+  minutes = ((timeInMillis / 1000) / 60);
+  seconds = (timeInMillis / 1000);
+  millis = timeInMillis % 1000;
+  // TODO fix!
+  if(minutes < 1) {
+    minutes = 0.0;
+  }
+  if(seconds < 1) {
+    seconds = 0.0;
+  }
+  if(millis < 1) {
+    millis = 0.0;
+  }
+  
+  return minutes.toStringAsFixed(0) + ":" + seconds.toStringAsFixed(0).padLeft(2, '0') + ":" + millis.toStringAsFixed(0).padLeft(2, '0');
+}
+
 Widget buildBigFloatingButton(String text, VoidCallback callback) {
   return new Container(
     width: 200.0,
@@ -533,6 +549,7 @@ class SolveDetails {
 }
 
 List<String> previousSolvesList = [];
+List<int> previousSolvesInMilliseconds = [];
 double averageOfFive = 0.0;
 
 Widget buildStatisticsList(BuildContext context, int index) {
