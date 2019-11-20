@@ -393,20 +393,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (cubeStopwatch.isRunning) {
         setState(() {
           previousSolvesInMilliseconds.insert(0, cubeStopwatch.elapsedMilliseconds);
+          previousSolvesList.insert(0, stopwatchTimeToDisplay);
           cubeStopwatch.stop();
 
-          // TODO put 5 into variable
+          // TODO put 5 into variable?
           if(previousSolvesInMilliseconds.length >= 5) {
-             averageOfFive = 0.0;
-             //Duration solveAverageDuration = new Duration(hours: 0, minutes: , seconds: , milliseconds: );
+             averageOfFive = 0;
+
             for(int i = 0; i < 5 ;i++) {
               averageOfFive = averageOfFive + previousSolvesInMilliseconds[i];
             }
 
-            averageOfFive = averageOfFive / 5;
+            averageOfFive = (averageOfFive / 5).round();
           }
 
-          previousSolvesList.insert(0, stopwatchTimeToDisplay);
           scrambleList();
         });
       } else {
@@ -486,29 +486,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
-String millisToString(double timeInMillis) {
+String millisToString(int timeInMillis) {
+  Duration solveDuration = new Duration(milliseconds: timeInMillis);
+  int minutes =  solveDuration.inMinutes;
+  int seconds = solveDuration.inSeconds;
+  int millis = solveDuration.inMilliseconds;
 
-  //Duration solveDuration = new Duration(milliseconds: timeInMillis);
-
-  double minutes = 0;
-  double seconds = 0;
-  double millis = 0;
-
-  minutes = ((timeInMillis / 1000) / 60);
-  seconds = (timeInMillis / 1000);
-  millis = timeInMillis % 1000;
-  // TODO fix!
-  if(minutes < 1) {
-    minutes = 0.0;
-  }
-  if(seconds < 1) {
-    seconds = 0.0;
-  }
-  if(millis < 1) {
-    millis = 0.0;
-  }
-  
-  return minutes.toStringAsFixed(0) + ":" + seconds.toStringAsFixed(0).padLeft(2, '0') + ":" + millis.toStringAsFixed(0).padLeft(2, '0');
+  if(averageOfFive > 0) {
+    return minutes.toString() + ":" + seconds.toString().padLeft(2, '0') + ":" +
+        millis.toString().substring(1);
+  } else
+    return "0:00:000";
 }
 
 Widget buildBigFloatingButton(String text, VoidCallback callback) {
@@ -550,7 +538,7 @@ class SolveDetails {
 
 List<String> previousSolvesList = [];
 List<int> previousSolvesInMilliseconds = [];
-double averageOfFive = 0.0;
+int averageOfFive = 0;
 
 Widget buildStatisticsList(BuildContext context, int index) {
   return new Text(
