@@ -396,7 +396,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           previousSolvesList.insert(0, stopwatchTimeToDisplay);
           cubeStopwatch.stop();
 
-          // TODO put 5 into variable?
           if(previousSolvesInMilliseconds.length >= 5) {
              averageOfFive = 0;
 
